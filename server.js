@@ -33,7 +33,29 @@ wss.on('connection', (ws) => {
     // console.log( "Message from client:", parsedJSON )
     // console.log( "or", event.data );
     //console.log( "User", parsedJSON.username, "said", parsedJSON.content, "uuid:", uuid.v4() );
-    wss.broadcast( JSON.stringify( { id: uuid.v4(), username: parsedJSON.username, content: parsedJSON.content } ) );
+
+    switch( parsedJSON.type ){
+
+    case "postMessage":
+      wss.broadcast( JSON.stringify( {
+        type: "incomingMessage",
+        id: uuid.v4(),
+        username: parsedJSON.username,
+        content: parsedJSON.content
+      }));
+      break;
+
+    case "postNotification":
+      wss.broadcast( JSON.stringify( {
+        type: "incomingNotification",
+        content: parsedJSON.content
+      }));
+      break;
+
+    default:
+      console.log("Error, received a packet with an unknown type" );
+    }
+
   }
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
   ws.on('close', () => console.log('Client disconnected'));
